@@ -41,6 +41,7 @@ func Load() {
 		if err == nil {
 			log.Printf("Database connected successfully after %d attempt(s)", i+1)
 			Migrate(DB)
+			Seeder(DB)
 			return
 		}
 		log.Printf("Failed to connect to database, retrying (%d/%d): %v", i+1, maxRetries, err)
