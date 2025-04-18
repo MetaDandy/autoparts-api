@@ -5,6 +5,7 @@ import (
 	"github.com/MetaDandy/autoparts-api/src/core/permission"
 )
 
+// Container holds all module dependencies.
 type Container struct {
 	// Permissions
 	PermissionRepo    *permission.Repository
@@ -12,6 +13,7 @@ type Container struct {
 	PermissionHandler *permission.Handler
 }
 
+// SetUpContainer wires repositories, services and handlers.
 func SetUpContainer() *Container {
 	permisionRepo := permission.NewRepository(config.DB)
 	permissionSvc := permission.NewService(permisionRepo)

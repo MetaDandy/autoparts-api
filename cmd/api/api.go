@@ -5,6 +5,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
+// SetupApi mounts all module routes under /api/v1.
 func SetupApi(app *fiber.App, c *src.Container) {
 	api := app.Group("/api/v1")
 

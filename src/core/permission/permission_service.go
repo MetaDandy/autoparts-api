@@ -4,14 +4,17 @@ import (
 	"github.com/MetaDandy/autoparts-api/helper"
 )
 
+// Service orchestrates business logic for permissions.
 type Service struct {
 	repo Repository
 }
 
+// NewService constructs a Permission service with the given repository.
 func NewService(r Repository) *Service {
 	return &Service{repo: r}
 }
 
+// FindAll returns a paginated set of PermissionResponse DTOs.
 func (s *Service) FindAll(opts *helper.FindAllOptions) (*helper.PaginatedResponse[PermissionResponse], error) {
 	roles, total, err := s.repo.FindAll(opts)
 	if err != nil {
