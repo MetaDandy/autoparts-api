@@ -17,7 +17,7 @@ type PermissionResponse struct {
 }
 
 // permissionToDTO maps a model.Permission to a PermissionResponse DTO.
-func permissionToDTO(p *model.Permission) PermissionResponse {
+func PermissionToDTO(p *model.Permission) PermissionResponse {
 	return PermissionResponse{
 		ID:        p.ID.String(),
 		Name:      p.Name,
@@ -31,7 +31,7 @@ func permissionToDTO(p *model.Permission) PermissionResponse {
 func PermissionToListDTO(list []model.Permission) []PermissionResponse {
 	out := make([]PermissionResponse, len(list))
 	for i := range list {
-		out[i] = permissionToDTO(&list[i])
+		out[i] = PermissionToDTO(&list[i])
 	}
 	return out
 }

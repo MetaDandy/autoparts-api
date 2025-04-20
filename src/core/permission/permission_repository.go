@@ -10,6 +10,7 @@ import (
 type Repository interface {
 	// FindAll returns a slice of Permission and the total count.
 	FindAll(opts *helper.FindAllOptions) ([]model.Permission, int64, error)
+	FindByIDs(ids []string) ([]model.Permission, error)
 }
 
 type repo struct {
@@ -30,4 +31,13 @@ func (c *repo) FindAll(opts *helper.FindAllOptions) ([]model.Permission, int64, 
 
 	err := query.Find(&types).Error
 	return types, total, err
+}
+
+// FindByIDs search all permissions using the ID and returns the matches.
+func (r *repo) FindByIDs(ids []string) ([]model.Permission, error) {
+	var perms []model.Permission
+	if err := r.db.Where("id IN ?", ids).Find(&perms).Error; err != nil {
+		return nil, err
+	}
+	return perms, nil
 }

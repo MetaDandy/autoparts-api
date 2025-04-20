@@ -36,7 +36,7 @@ func (c *Repository) FindAll(opts *helper.FindAllOptions) ([]model.Role, int64, 
 
 func (c *Repository) FindById(id string) (*model.Role, error) {
 	var Role model.Role
-	err := c.db.First(&Role, "id=?", id).Error
+	err := c.db.Preload("Permissions").First(&Role, "id = ?", id).Error
 
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, nil
@@ -46,7 +46,7 @@ func (c *Repository) FindById(id string) (*model.Role, error) {
 
 func (c *Repository) FindByIdUnscoped(id string) (*model.Role, error) {
 	var Role model.Role
-	err := c.db.Unscoped().First(&Role, "id=?", id).Error
+	err := c.db.Unscoped().Preload("Permissions").First(&Role, "id = ?", id).Error
 
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, nil
@@ -54,8 +54,8 @@ func (c *Repository) FindByIdUnscoped(id string) (*model.Role, error) {
 	return &Role, err
 }
 
-func (c *Repository) HardDelete(id string) error {
-	return c.db.Unscoped().Delete(&model.Role{}, "id=?", id).Error
+func (c *Repository) SoftDelete(id string) error {
+	return c.db.Delete(&model.Role{}, "id = ?", id).Error
 }
 
 func (c *Repository) Restore(id string) error {
@@ -63,8 +63,4 @@ func (c *Repository) Restore(id string) error {
 		Model(&model.Role{}).
 		Where("id=?", id).
 		Update("deleted_at", nil).Error
-}
-
-func (c *Repository) SoftDelete(id string) error {
-	return c.db.Delete(&model.Role{}, "id = ?", id).Error
 }
