@@ -16,6 +16,5 @@ type Role struct {
 	DeletedAt   gorm.DeletedAt `gorm:"index"`
 
 	Permissions []Permission `gorm:"many2many:role_permission;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
-
-	// Users       []User         `gorm:"foreignKey:RoleID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
+	Users       []User       `gorm:"foreignKey:RoleID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
 }

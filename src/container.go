@@ -2,8 +2,10 @@ package src
 
 import (
 	"github.com/MetaDandy/autoparts-api/config"
+	"github.com/MetaDandy/autoparts-api/src/core/auth"
 	"github.com/MetaDandy/autoparts-api/src/core/permission"
 	"github.com/MetaDandy/autoparts-api/src/core/role"
+	"github.com/MetaDandy/autoparts-api/src/core/user"
 )
 
 // Container holds all module dependencies.
@@ -17,6 +19,11 @@ type Container struct {
 	RoleRepo    *role.Repository
 	RoleSvc     *role.Service
 	RoleHandler *role.Handler
+
+	// User
+	UserRepo    *user.Repository
+	UserSvc     *user.Service
+	UserHandler *user.Handler
 }
 
 // SetUpContainer wires repositories, services and handlers.
@@ -31,6 +38,11 @@ func SetUpContainer() *Container {
 	roleSvc := role.NewService(roleRepo, permisionRepo)
 	roleHandler := role.NewHandler(roleSvc)
 
+	// User
+	userRepo := user.NewRepository(config.DB)
+	userSvc := user.NewService(userRepo, &auth.CognitoProvider{})
+	userHandler := user.NewHandler(userSvc)
+
 	return &Container{
 		// Permission
 		PermissionRepo:    &permisionRepo,
@@ -41,5 +53,10 @@ func SetUpContainer() *Container {
 		RoleRepo:    roleRepo,
 		RoleSvc:     roleSvc,
 		RoleHandler: roleHandler,
+
+		// User
+		UserRepo:    userRepo,
+		UserSvc:     userSvc,
+		UserHandler: userHandler,
 	}
 }

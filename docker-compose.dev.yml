@@ -17,14 +17,25 @@ services:
       - MINIO_ACCESS_KEY=${MINIO_ACCESS_KEY}
       - MINIO_SECRET_KEY=${MINIO_SECRET_KEY}
       - MINIO_BUCKET=${MINIO_BUCKET}
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - AWS_REGION=${AWS_REGION}
+      - AWS_ENDPOINT_URL=${AWS_ENDPOINT_URL}
       - GOFLAGS=-buildvcs=false
     volumes:
       - .:/app
       - /go/pkg/mod
       - /app/tmp
     depends_on:
-      - db
-      - minio
+      db:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+      localstack:
+        condition: service_healthy
+    networks:
+      - backend
+    restart: on-failure
 
   db:
     image: postgres:15-alpine
@@ -38,6 +49,13 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - backend
 
   minio:
     image: minio/minio:latest
@@ -50,7 +68,48 @@ services:
       - "9000:9000"
     volumes:
       - minio_data:/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:9000/minio/health/live || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - backend
+    restart: on-failure
+
+  localstack:
+    image: localstack/localstack:latest
+    container_name: localstack
+    # expongo el “edge” port y rango de servicios (por si en el futuro necesitas SQS, SES…)
+    ports:
+      - "4566:4566"
+      - "4510-4559:4510-4559"
+    environment:
+      - SERVICES=cognito,s3          # simulo sólo Cognito y S3
+      - PERSISTENCE=1                # activa persistencia “moderna”
+      - DEBUG=1                      # opcional, para ver más logs
+      - AWS_ACCESS_KEY_ID=test       # credenciales “falsas” para tus SDKs
+      - AWS_SECRET_ACCESS_KEY=test
+      - AWS_REGION=us-east-1
+    # monto TODO /var/lib/localstack para que sobreviva reinicios
+    volumes:
+      - localstack_data:/var/lib/localstack
+      - /var/run/docker.sock:/var/run/docker.sock  # útil para emular Lambdas u otros servicios
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:4566/_localstack/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    networks:
+      - backend
+    restart: on-failure
 
 volumes:
   postgres_data:
   minio_data:
+  localstack_data:
+
+networks:
+  backend:
+    driver: bridge

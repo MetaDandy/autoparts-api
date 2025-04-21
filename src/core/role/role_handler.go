@@ -31,7 +31,7 @@ func (h *Handler) FindAll(c *fiber.Ctx) error {
 	roles, err := h.svc.FindAll(opts)
 	if err != nil {
 		return helper.JSONError(c, http.StatusInternalServerError,
-			"Error obteniendo permisos", err.Error())
+			"Error obteniendo roles", err.Error())
 	}
 
 	return c.JSON(roles)
